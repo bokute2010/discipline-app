@@ -1,0 +1,18 @@
+name: aifa-web-fe
+id: ari:cloud:compass:761462c3-7872-4d0c-8355-5f5df53433ca:component/a4e50fab-58bc-466e-a5cb-67a1cbcaef54/9498d8d3-0f14-4ac2-a941-32112db9c8f1
+description: null
+configVersion: 1
+typeId: APPLICATION
+ownerId: ari:cloud:identity::team/3cb7df10-b616-48e6-ab1f-6cab0dc1bf43
+fields:
+  tier: 4
+links:
+  - name: null
+    type: REPOSITORY
+    url: https://github.com/Atlas-Data-Team/aifa-web-fe
+relationships:
+  DEPENDS_ON: []
+labels:
+  - language:typescript
+  - source:github
+customFields: null
