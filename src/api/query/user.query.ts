@@ -15,7 +15,7 @@ const fetchUserData = async (userId: string) => {
   return snapshot.data();
 };
 
-export const useUserData = () => {
+export const useQueryUserData = () => {
   const userId = auth.currentUser?.uid || '';
 
   return useQuery({

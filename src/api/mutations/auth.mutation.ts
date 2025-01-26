@@ -3,6 +3,7 @@ import { requestSignIn, requestSignOut, requestSignUp } from "../requests/auth.r
 import { IPayloadSignIn } from "@/interfaces/auth.interface";
 import { saveUserToFirestore } from "../requests/user.request";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
 
 
 
@@ -17,8 +18,13 @@ export const useSignIn = () => {
             onSuccess: (user) => {
                 console.log('User signed in:', user);
                 // Update user cache
-                queryClient.setQueryData(['user'], user);
-                toast.success('Signed in successfully');
+                if (user.emailVerified) {
+                    queryClient.setQueryData(['user'], user);
+                    toast.success('Signed in successfully');
+                } else {
+                    toast.error('Please verify your email');
+                }
+
             },
             onError: (error) => {
                 console.error('Error signing in:', error.message);
@@ -27,7 +33,7 @@ export const useSignIn = () => {
 };
 
 export const useSignUp = () => {
-    const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     return useMutation(
         {
@@ -43,9 +49,8 @@ export const useSignUp = () => {
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                 });
-                // Update user cache
-                queryClient.setQueryData(['user'], user);
                 toast.success('Signed up successfully');
+                navigate('/auth/login');
             },
             onError: (error) => {
                 console.error('Error signing up:', error.message);

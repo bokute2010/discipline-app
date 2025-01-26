@@ -17,8 +17,11 @@ export const useFirebaseAuth = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
       setLoading(false);
+      if (!currentUser?.emailVerified){
+        return;
+      }
+      setUser(currentUser);
     });
 
     return () => unsubscribe();
