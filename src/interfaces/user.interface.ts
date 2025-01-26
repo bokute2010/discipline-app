@@ -14,3 +14,15 @@ export interface ICreateUserResponse {
   message: string;
   data: any;
 }
+
+
+
+export interface IUser {
+  uid: string;
+  email: string;
+  displayName?: string;
+  photoURL?: string;
+  totalPoints: number;
+  createdAt: string;
+  updatedAt: string;
+}

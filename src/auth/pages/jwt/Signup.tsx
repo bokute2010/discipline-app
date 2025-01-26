@@ -7,20 +7,21 @@ import * as Yup from 'yup';
 import { useAuthContext } from '../../useAuthContext';
 import { KeenIcon } from '@/components';
 import { useLayout } from '@/providers';
+import { useSignUp } from '@/api/mutations/auth.mutation';
 
 const randomNumber = Math.round(Math.random() * 10000000000);
 
 const initialValues =
   import.meta.env.VITE_APP_MODE === 'DEV'
     ? {
-        username: `weedlee${randomNumber}`,
+       
         email: `weedlee.developer+${randomNumber}@gmail.com`,
         password: '@Test123',
         confirmpassword: '@Test123',
         acceptTerms: false
       }
     : {
-        username: '',
+      
         email: '',
         password: '',
         confirmpassword: '',
@@ -33,10 +34,6 @@ const signupSchema = Yup.object().shape({
     .min(3, 'Tối thiểu 3 ký tự')
     .max(50, 'Tối đa 50 ký tự')
     .required('Email là bắt buộc'),
-  username: Yup.string()
-    .min(5, 'Tối thiểu 5 ký tự')
-    .max(50, 'Tối đa 50 ký tự')
-    .required('Tên đăng nhập là bắt buộc'),
   password: Yup.string()
     .min(8, 'Tối thiểu 8 ký tự')
     .max(50, 'Tối đa 50 ký tự')
@@ -64,6 +61,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const { currentLayout } = useLayout();
+  const {mutate: signup} = useSignUp();
 
   const formik = useFormik({
     initialValues,
@@ -71,11 +69,11 @@ const Signup = () => {
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       // setLoading(true);
       try {
-        if (!register) {
-          throw new Error('JWTProvider is required for this form.');
-        }
-        await register(values.username, values.email, values.password);
-        navigate('/auth/signup/check-email', { replace: true });
+        console.log('values', values);
+        signup({
+          email: values.email,
+          password: values.password
+        })
       } catch (error: any) {
         console.error(error);
         const errorMessage =
@@ -145,29 +143,6 @@ const Signup = () => {
           )}
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label className="form-label text-gray-900">Tên đăng nhập</label>
-          <label className="input">
-            <input
-              placeholder="davidbalaban"
-              type="text"
-              autoComplete="off"
-              {...formik.getFieldProps('username')}
-              className={clsx(
-                'form-control bg-transparent',
-                { 'is-invalid': formik.touched.username && formik.errors.username },
-                {
-                  'is-valid': formik.touched.username && !formik.errors.username
-                }
-              )}
-            />
-          </label>
-          {formik.touched.username && formik.errors.username && (
-            <span role="alert" className="text-danger text-xs mt-1">
-              {formik.errors.username}
-            </span>
-          )}
-        </div>
 
         <div className="flex flex-col gap-1">
           <label className="form-label text-gray-900">Mật khẩu</label>

@@ -8,6 +8,7 @@ import { useAuthContext } from '@/auth';
 import { useLayout } from '@/providers';
 import { useCreateUser } from '@/api/mutations/user.mutation';
 import { fetchAuthSession } from 'aws-amplify/auth';
+import { useSignIn } from '@/api/mutations/auth.mutation';
 const loginSchema = Yup.object().shape({
   email: Yup.string()
     .min(5, 'Tối thiểu 5 ký tự')
@@ -25,17 +26,14 @@ const loginSchema = Yup.object().shape({
 });
 
 const Login = () => {
-  const { mutate: createUser } = useCreateUser(onSuccessCreateUser);
 
-  function onSuccessCreateUser() {
-    navigate(from, { replace: true });
-  }
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuthContext();
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
+  const { mutate: signIn } = useSignIn(); 
   const { currentLayout } = useLayout();
   let initialValues = {
     email: localStorage.getItem('email') || '',
@@ -44,7 +42,7 @@ const Login = () => {
   };
   if (import.meta.env.VITE_APP_MODE === 'DEV') {
     initialValues = {
-      email: 'weedlee',
+      email: 'weedlee.developer@gmail.com',
       password: '@Test123',
       remember: !!localStorage.getItem('email')
     };
@@ -55,68 +53,15 @@ const Login = () => {
     setShowPassword((prev) => !prev);
   };
 
-  async function handleCreateUser() {
-    const isNew = localStorage.getItem('isNew');
-
-    const session = await fetchAuthSession();
-    const userId = session.userSub;
-    const username = session.tokens?.accessToken.payload.username?.toString();
-    const email = session.tokens?.idToken?.payload.email?.toString();
-    if (isNew === 'true' && userId && username && email) {
-      createUser({
-        email,
-        sub_id: userId,
-        username
-      });
-    }
-    // remove local storage
-    // localStorage.removeItem('signup_userId');
-    localStorage.removeItem('signup_username');
-    localStorage.removeItem('signup_email');
-    localStorage.removeItem('isNew');
-  }
 
   const formik = useFormik({
     initialValues,
     validationSchema: loginSchema,
     onSubmit: async (values, { setStatus, setSubmitting }) => {
-      setLoading(true);
-      try {
-        if (!login) {
-          throw new Error('JWTProvider is required for this form.');
-        }
-        await login(
-          values.email,
-          values.password,
-          () => {
-            localStorage.setItem('isNew', 'true');
-            localStorage.setItem('signup_username', values.email);
-            console.log('Please confirm your email address');
-            navigate('/auth/confirm-signup');
-            return;
-          },
-          () => {
-            // Remember email if 'remember' is checked
-            if (values.remember) {
-              localStorage.setItem('email', values.email);
-            } else {
-              localStorage.removeItem('email');
-            }
-            if (localStorage.getItem('isNew') === 'true') {
-              handleCreateUser();
-              return;
-            }
-            navigate(from, { replace: true });
-          }
-        );
-      } catch (error: any) {
-        const errorMessage =
-          error?.response?.data?.message || error?.message || 'The login details are incorrect';
-        setStatus(errorMessage);
-      } finally {
-        setSubmitting(false);
-        setLoading(false);
-      }
+      signIn({
+        email: values.email,
+        password: values.password
+      })
     }
   });
 

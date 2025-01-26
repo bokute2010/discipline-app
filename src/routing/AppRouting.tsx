@@ -87,8 +87,10 @@ import { RawDataPage } from '@/pages/new-design/RawData';
 import { StagingDataPage } from '@/pages/new-design/StagingData';
 import { AIModelsPage } from '@/pages/new-design/AiModels';
 import { SavedPromptPage } from '@/pages/new-design/SavedPrompt';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 
 const AppRouting = (): ReactElement => {
+  const { user } = useFirebaseAuth();
   const { setProgressBarLoader } = useLoaders();
   const { verify } = useAuthContext();
   const [previousLocation, setPreviousLocation] = useState('');

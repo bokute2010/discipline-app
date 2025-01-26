@@ -1,7 +1,29 @@
 import { IResponseFetchUser } from '@/auth';
 import { axiosInstance } from '../axiosInstance';
 import { API_ENDPOINTS } from '../constants';
-import { IPayloadCreateUser, IPayloadUpdateUserProfile } from '@/interfaces/user.interface';
+import { IPayloadCreateUser, IPayloadUpdateUserProfile, IUser } from '@/interfaces/user.interface';
+
+
+
+import { db } from '@/config/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+
+export const saveUserToFirestore = async (user: IUser): Promise<void> => {
+  try {
+    const userRef = doc(db, 'users', user.uid); // Reference to the user's document
+    await setDoc(userRef, {
+      uid: user.uid,
+      email: user.email,
+      displayName: user.displayName || '',
+      createdAt: new Date().toISOString(),
+    });
+    console.log('User data saved to Firestore');
+  } catch (error) {
+    console.error('Error saving user data to Firestore:', (error as Error).message);
+    throw error;
+  }
+};
+
 
 /**
  * Updates the user profile with the provided information.

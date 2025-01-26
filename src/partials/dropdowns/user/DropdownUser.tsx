@@ -5,8 +5,10 @@ import { toAbsoluteUrl } from '@/utils';
 import { Link } from 'react-router-dom';
 import { useSettings } from '@/providers/SettingsProvider';
 import { useAuthContext } from '@/auth';
+import { useSignOut } from '@/api/mutations/auth.mutation';
 
 const DropdownUser = () => {
+  const { mutate: signOut } = useSignOut();
   const { settings, storeSettings } = useSettings();
   const { logout, currentUser } = useAuthContext();
 
@@ -81,7 +83,7 @@ const DropdownUser = () => {
         </div>
 
         <div className="menu-item px-4 py-1.5">
-          <a onClick={logout} className="btn btn-sm btn-light justify-center">
+          <a onClick={() => signOut()} className="btn btn-sm btn-light justify-center">
             Đăng xuất
           </a>
         </div>

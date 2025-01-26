@@ -23,6 +23,8 @@ import {
   resendSignUpCode
 } from 'aws-amplify/auth';
 import { toast } from 'react-toastify';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import { User as FirebaseUser } from '@firebase/auth';
 
 
 const API_URL = import.meta.env.VITE_APP_API_URL;
@@ -32,8 +34,8 @@ export const REGISTER_URL = `/auth/signup`;
 
 interface AuthContextProps {
   isLoading: boolean;
-  auth: AuthModel | undefined;
-  saveAuth: (auth: AuthModel | undefined) => void;
+  auth: FirebaseUser | undefined;
+  saveAuth: (auth: FirebaseUser | undefined) => void;
   currentUser: UserModel | undefined;
   setCurrentUser: Dispatch<SetStateAction<UserModel | undefined>>;
   login: (
@@ -59,17 +61,24 @@ interface AuthContextProps {
 const AuthContext = createContext<AuthContextProps | null>(null);
 
 const AuthProvider = ({ children }: PropsWithChildren) => {
+  const { user, getUserFirebase } = useFirebaseAuth();
+  console.log('user', user);
   const [loading, setLoading] = useState(true);
-  const [auth, setAuth] = useState<AuthModel | undefined>(authHelper.getAuth());
+  const [auth, setAuth] = useState<FirebaseUser | undefined>();
   const [currentUser, setCurrentUser] = useState<UserModel | undefined>();
   
   // Verity user session and validate bearer authentication
   const verify = async () => {
-    if (auth) {
+    const users:any = await getUserFirebase();
+    console.log('users', users);
+
+    // console.log('verify');
+    if (users) {
       try {
-        const { data } = await getUser();
-        console.log('data', data);
-        setCurrentUser(data?.data);
+        setAuth(users);
+        // const { data } = await getUser();
+        // console.log('data', data);
+        // setCurrentUser(data?.data);
       } catch (error) {
         console.error('An error occurred during verify.', error);
         saveAuth(undefined);
@@ -77,6 +86,8 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       }
     }
   };
+
+  
 
   useEffect(() => {
     verify().finally(() => {
@@ -86,13 +97,9 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   // Set auth object and save it to local storage
-  const saveAuth = (auth: AuthModel | undefined) => {
+  const saveAuth = (auth: FirebaseUser | undefined) => {
     setAuth(auth);
-    if (auth) {
-      authHelper.setAuth(auth);
-    } else {
-      authHelper.removeAuth();
-    }
+    
   };
 
   
@@ -110,7 +117,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         const accessToken: string = await getAccessToken();
         const subjectId: string = await getSubjectId();
         localStorage.setItem('subjectId', subjectId);
-        saveAuth({ AccessToken: accessToken });
+        // saveAuth({ AccessToken: accessToken });
       
         if (onSuccess) {
           onSuccess();

@@ -1,18 +1,17 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-
 import { ScreenLoader } from '@/components/loaders';
-
-import { useAuthContext } from './useAuthContext';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 
 const RequireAuth = () => {
-  const { auth, isLoading } = useAuthContext();
-  const location = useLocation();
 
-  if (isLoading) {
+  const location = useLocation();
+  const { user, loading } = useFirebaseAuth();
+
+  if (loading) {
     return <ScreenLoader />;
   }
 
-  return auth ? <Outlet /> : <Navigate to="/auth/login" state={{ from: location }} replace />;
+  return user ? <Outlet /> : <Navigate to="/auth/login" state={{ from: location }} replace />;
 };
 
 export { RequireAuth };

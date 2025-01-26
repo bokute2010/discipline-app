@@ -4,6 +4,7 @@ import { useSettings } from './providers/SettingsProvider';
 import { AppRouting } from './routing';
 import { PathnameProvider } from './providers';
 import { Amplify } from 'aws-amplify';
+import './config/firebase';
 
 const { BASE_URL } = import.meta.env;
 
